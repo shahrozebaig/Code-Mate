@@ -19,6 +19,8 @@ At its core, Discord Copilot demonstrates how modern LLMs can be safely integrat
 
 The result is a **scalable, extensible, and reviewer‑ready AI system** that mirrors how AI assistants should function in professional software teams.
 
+https://github.com/user-attachments/assets/abf809ed-59af-4c51-af6e-e2f8cae00364
+
 ---
 
 ## **What This Project Does**
@@ -32,6 +34,15 @@ The result is a **scalable, extensible, and reviewer‑ready AI system** that mi
 
 ---
 
+<img width="2880" height="10060" alt="screencapture-localhost-5173-2026-01-15-16_42_54" src="https://github.com/user-attachments/assets/c924afba-486b-452f-9fbf-a77179c2d3d5" />
+
+<img width="2880" height="1555" alt="screencapture-localhost-5173-2026-01-15-16_45_46" src="https://github.com/user-attachments/assets/84aefb4f-1ffc-4073-af37-408e42817672" />
+
+<img width="2880" height="1555" alt="screencapture-localhost-5173-2026-01-15-16_43_54" src="https://github.com/user-attachments/assets/ea89840d-852b-495c-886d-9348b971b2a0" />
+
+<img width="2880" height="2178" alt="screencapture-localhost-5173-2026-01-15-16_44_44" src="https://github.com/user-attachments/assets/2bda5157-b94f-42e4-930d-2bdb0e56cded" />
+
+---
 ## **Why This Project Is Useful**
 
 In real development teams, AI bots often create noise, hallucinate answers, or behave unpredictably. Discord Copilot solves these problems by:
