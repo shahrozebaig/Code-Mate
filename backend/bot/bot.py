@@ -25,6 +25,11 @@ intents.guilds = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
+# 🔹 NEW: helper to split long Discord messages (NO EXISTING CODE TOUCHED)
+def split_message(text, limit=1900):
+    return [text[i:i + limit] for i in range(0, len(text), limit)]
+
+
 @bot.event
 async def on_ready():
     print("✅ BOT READY:", bot.user)
@@ -40,8 +45,11 @@ async def on_message(message: discord.Message):
             print("⛔ Ignored bot message")
             return
 
-        # 🔹 NEW: respond only when mentioned
-        if bot.user not in message.mentions:
+        # 🔹 NEW: detect DM (NO EXISTING LOGIC REMOVED)
+        is_dm = isinstance(message.channel, discord.DMChannel)
+
+        # 🔹 UPDATED: mention required ONLY in servers
+        if not is_dm and bot.user not in message.mentions:
             print("⛔ Bot not mentioned")
             return
 
@@ -51,7 +59,8 @@ async def on_message(message: discord.Message):
         allowed_channels = settings["allowlisted_channels"]
         print("✅ ALLOWED:", allowed_channels)
 
-        if not is_channel_allowed(message.channel.id, allowed_channels):
+        # 🔹 UPDATED: allow-list applies ONLY to servers
+        if not is_dm and not is_channel_allowed(message.channel.id, allowed_channels):
             print("⛔ CHANNEL NOT ALLOWED")
             return
 
@@ -73,7 +82,12 @@ async def on_message(message: discord.Message):
         response = await call_llm(prompt)
         print("🤖 LLM RESPONSE:", response)
 
-        await message.reply(response)
+        # 🔹 UPDATED: safe message sending (NO LOGIC CHANGED)
+        chunks = split_message(response)
+        await message.reply(chunks[0])
+
+        for chunk in chunks[1:]:
+            await message.channel.send(chunk)
 
         new_summary = update_summary(memory, message.content, response)
         update_conversation_summary(new_summary)

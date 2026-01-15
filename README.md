@@ -104,21 +104,45 @@ This flow ensures **contextual, controlled, and predictable responses**.
 
 ---
 
-## **Mention‑Only Interaction Design**
+## **Interaction Rules: Server vs Direct Messages**
 
-To maintain a professional user experience, the bot responds **only when explicitly mentioned**:
+Discord Copilot is designed to behave differently depending on **where** it is used. This distinction ensures a clean experience in servers while still allowing private assistance via direct messages.
+
+### **1. Server Channels**
+
+In Discord servers, the bot follows **strict control rules**:
+
+* The bot responds **only when explicitly mentioned**
+* The channel must be **allow‑listed by the admin**
+* Messages without a mention are ignored
+
+Example:
 
 ```
-@DisBot how do we deploy the bot?
+hello                ❌ no response
+@CodeMate hello      ✅ bot replies
 ```
 
-This prevents:
+This prevents spam and ensures the bot only participates when intentionally invoked.
 
-* Channel spam
-* Accidental triggers
-* Disruption of normal team conversations
+---
 
-This design choice significantly improves real‑world usability.
+### **2. Direct Messages (DMs)**
+
+In direct messages, the bot behaves differently:
+
+* The bot **always responds** in DMs
+* No mention is required
+* Channel allow‑lists are **not applied**
+
+Example:
+
+```
+User (DM): hello
+Bot: Hi! How can I help you today?
+```
+
+This design allows users to privately interact with the AI while keeping server conversations controlled and professional.
 
 ---
 
