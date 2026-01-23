@@ -23,6 +23,39 @@ https://github.com/user-attachments/assets/abf809ed-59af-4c51-af6e-e2f8cae00364
 
 ---
 
+## Add CodeMate to Discord
+
+Open the invite link below:
+
+```
+https://discord.com/oauth2/authorize?client_id=1461042716719841282
+```
+
+When you open the link, you will see **two options**:
+
+---
+
+### **Add to My Apps**
+
+* Adds CodeMate to your personal Discord apps
+* Works only in **Direct Messages (DMs)**
+* No server access
+* No admin permission required
+
+---
+
+### **Add to Server**
+
+* Adds CodeMate to a Discord server
+* Requires **Manage Server** permission
+* Bot appears in the server member list
+* Bot responds only when mentioned:
+
+  ```
+  @CodeMate hello
+  ```
+  
+---
 ## **What This Project Does**
 
 * Provides a **Discord bot** that assists teams with software‑related questions
