@@ -27,8 +27,8 @@ https://github.com/user-attachments/assets/abf809ed-59af-4c51-af6e-e2f8cae00364
 
 Open the invite link below:
 
-```
-https://discord.com/oauth2/authorize?client_id=1461042716719841282
+```[
+https://discord.com/oauth2/authorize?client_id=1461042716719841282](https://discord.com/oauth2/authorize?client_id=1461042716719841282&permissions=117824&integration_type=0&scope=bot+applications.commands)
 ```
 
 When you open the link, you will see **two options**:
