@@ -8,6 +8,7 @@ from services.memory_service import update_summary
 from services.embedding_service import embed_text
 from services.rag_service import retrieve_knowledge
 from services.attachment_service import process_attachments
+from services.image_gen_service import generate_image_url
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -49,6 +50,7 @@ async def on_message(message: discord.Message):
             prompt_parts.append(f"The user has provided a document (see 'ATTACHED DOCUMENT CONTENT' in the user message).")
         prompt_parts.append(f"USER REQUEST: {message.content}")
         prompt_parts.append("\nINSTRUCTIONS: Answer the request directly. Use your general knowledge for everything else. Never apologize for missing memory.")
+        prompt_parts.append("If the user wants you to create, generate, or draw an image, your response MUST start with 'IMAGE_GEN: {description of the image}' followed by a brief confirmation.")
         if not image_url:
             short_memory = memory[:1500] if memory else ""
             if short_memory.strip():
@@ -61,6 +63,23 @@ async def on_message(message: discord.Message):
         print("🚀 CALLING LLM...")
         response = await call_llm(full_system_prompt, image_url=image_url)
         print("🤖 LLM RESPONSE:", response)
+        if response.startswith("IMAGE_GEN:"):
+            try:
+                lines = response.split("\n")
+                img_prompt = lines[0].replace("IMAGE_GEN:", "").strip()
+                caption = "\n".join(lines[1:]).strip() if len(lines) > 1 else "🎨 Here is your generated image:"
+                img_url = generate_image_url(img_prompt)
+                embed = discord.Embed(
+                    title="Image Generated", 
+                    description=f"**Prompt:** {img_prompt}",
+                    color=discord.Color.random()
+                )
+                embed.set_image(url=img_url)
+                embed.set_footer(text="Powered by Pollinations.ai")
+                await message.reply(content=caption, embed=embed)
+                return
+            except Exception as e:
+                print(f"Image Gen Error: {e}")
         chunks = split_message(response)
         await message.reply(chunks[0])
         for chunk in chunks[1:]:
