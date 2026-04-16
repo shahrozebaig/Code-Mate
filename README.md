@@ -6,6 +6,8 @@ CodeMate is a high-performance, public AI assistant designed for seamless integr
 
 - **Public Accessibility**: The bot is designed for universal deployment. It functions across all Discord servers and private messages without requiring administrative setup or complicated channel whitelisting.
 - **Contextual Memory**: Utilizes a rolling conversation summary stored in a Supabase backend to maintain context over long discussions, ensuring coherent and relevant assistance.
+- **Document & File Support**: Automatically extracts text from attached PDF and TXT files, allowing the bot to answer questions based on the content of your documents.
+- **Vision Capabilities**: Processes image attachments using advanced vision models, enabling the assistant to "see" and describe images or answer questions about their content.
 - **Retrieval-Augmented Generation (RAG)**: Integrates a vector database for document-based retrieval, allowing the assistant to ground its answers in specific knowledge bases or uploaded documents.
 - **Unrestricted Interaction**: Configured to provide comprehensive answers across a wide range of topics, acting as a versatile knowledge companion.
 
