@@ -5,13 +5,11 @@ import traceback
 from config.settings import DISCORD_TOKEN
 from config.prompts import BASE_PROMPT
 from services.supabase_service import (
-    get_admin_settings,
     get_conversation_summary,
     update_conversation_summary,
 )
 from services.llm_service import call_llm
 from services.memory_service import update_summary
-from utils.channel_guard import is_channel_allowed
 
 # 🔹 RAG ADDITION (NO EXISTING CODE CHANGED)
 from services.embedding_service import embed_text
@@ -53,16 +51,6 @@ async def on_message(message: discord.Message):
             print("⛔ Bot not mentioned")
             return
 
-        settings = get_admin_settings()
-        print("⚙️ SETTINGS:", settings)
-
-        allowed_channels = settings["allowlisted_channels"]
-        print("✅ ALLOWED:", allowed_channels)
-
-        # 🔹 UPDATED: allow-list applies ONLY to servers
-        if not is_dm and not is_channel_allowed(message.channel.id, allowed_channels):
-            print("⛔ CHANNEL NOT ALLOWED")
-            return
 
         print("🧠 FETCHING MEMORY")
         memory = get_conversation_summary()
@@ -72,7 +60,6 @@ async def on_message(message: discord.Message):
         knowledge = retrieve_knowledge(query_embedding) or "None"
 
         prompt = BASE_PROMPT.format(
-            system_prompt=settings["system_prompt"],
             memory=memory,
             knowledge=knowledge,
             user_message=message.content,

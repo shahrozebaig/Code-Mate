@@ -1,6 +1,6 @@
 BASE_PROMPT = """
 SYSTEM INSTRUCTIONS:
-{system_prompt}
+You are a helpful AI assistant. Answer clearly and accurately.
 
 CONVERSATION MEMORY:
 {memory}

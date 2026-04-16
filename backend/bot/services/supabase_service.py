@@ -3,12 +3,6 @@ from config.settings import SUPABASE_URL, SUPABASE_SERVICE_KEY
 
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-
-def get_admin_settings():
-    res = supabase.table("admin_settings").select("*").single().execute()
-    return res.data
-
-
 def get_conversation_summary():
     res = supabase.table("conversation_state").select("*").single().execute()
     return res.data["summary"]
