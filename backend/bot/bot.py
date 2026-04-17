@@ -9,6 +9,7 @@ from services.embedding_service import embed_text
 from services.rag_service import retrieve_knowledge
 from services.attachment_service import process_attachments
 from services.image_gen_service import generate_image_url
+from services.youtube_service import search_youtube_video
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -51,6 +52,7 @@ async def on_message(message: discord.Message):
         prompt_parts.append(f"USER REQUEST: {message.content}")
         prompt_parts.append("\nINSTRUCTIONS: Answer the request directly. Use your general knowledge for everything else. Never apologize for missing memory.")
         prompt_parts.append("If the user wants you to create, generate, or draw an image, your response MUST start with 'IMAGE_GEN: {description of the image}' followed by a brief confirmation.")
+        prompt_parts.append("If the user asks for a video, music, or song, your response MUST start with 'VIDEO_LINK: {search query}'. For the search query, prioritize official or most popular versions (e.g., add 'official music video' or 'original'). After that, provide ONLY a single short sentence like 'Enjoy!' or 'Here is the official video:'. NEVER include tips or mention 'Picture-in-Picture'.")
         if not image_url:
             short_memory = memory[:1500] if memory else ""
             if short_memory.strip():
@@ -80,6 +82,19 @@ async def on_message(message: discord.Message):
                 return
             except Exception as e:
                 print(f"Image Gen Error: {e}")
+        if response.startswith("VIDEO_LINK:"):
+            try:
+                lines = response.split("\n")
+                video_query = lines[0].replace("VIDEO_LINK:", "").strip()
+                caption = "\n".join(lines[1:]).strip() if len(lines) > 1 else "✅ Found the video for you:"
+                video_url = await search_youtube_video(video_query)
+                if video_url:
+                    await message.reply(f"{caption}\n{video_url}")
+                else:
+                    await message.reply("I searched YouTube but couldn't find a matching video link. Please try again with a different query!")
+                return
+            except Exception as e:
+                print(f"Video Search Error: {e}")
         chunks = split_message(response)
         await message.reply(chunks[0])
         for chunk in chunks[1:]:
