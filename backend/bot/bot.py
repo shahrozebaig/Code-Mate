@@ -22,34 +22,38 @@ async def on_ready():
 @bot.event
 async def on_message(message: discord.Message):
     try:
-        print("📩 MESSAGE RECEIVED:", message.content)
+        if message.author.bot:
+            return
+        is_dm = isinstance(message.channel, discord.DMChannel)
+        if not is_dm and not bot.user.mentioned_in(message):
+            return
+        clean_content = message.content
+        if bot.user.mentioned_in(message):
+            clean_content = clean_content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
+        print("📩 MESSAGE RECEIVED:", clean_content)
         print("📍 CHANNEL ID:", message.channel.id)
-        if message.content.strip() == "!clear":
+        if clean_content == "!clear":
             supabase_service.update_conversation_summary("")
             await message.reply("🧠 Memory cleared!")
             return
-        if message.author.bot:
-            print("⛔ Ignored bot message")
-            return
-        is_dm = isinstance(message.channel, discord.DMChannel)
         print("🧠 FETCHING MEMORY")
         memory = supabase_service.get_conversation_summary()
         print("📎 CHECKING ATTACHMENTS")
         doc_text, image_url = await process_attachments(message.attachments)
-        query_embedding = await embed_text(message.content)
+        query_embedding = await embed_text(clean_content)
         knowledge = retrieve_knowledge(query_embedding) or "None"
         if doc_text:
             print("📄 DOCUMENT TEXT EXTRACTED")
             truncated_doc = doc_text[:3000] + "..." if len(doc_text) > 3000 else doc_text
-            user_msg = f"{message.content}\n\nATTACHED DOCUMENT CONTENT (TRUNCATED):\n{truncated_doc}"
+            user_msg = f"{clean_content}\n\nATTACHED DOCUMENT CONTENT (TRUNCATED):\n{truncated_doc}"
         else:
-            user_msg = message.content
+            user_msg = clean_content
         prompt_parts = []
         if image_url:
             prompt_parts.append("CRITICAL: Analyzing the attached image is your top priority. Ignore any unrelated conversation history below and answer based on the visual content.")
         if doc_text:
             prompt_parts.append(f"The user has provided a document (see 'ATTACHED DOCUMENT CONTENT' in the user message).")
-        prompt_parts.append(f"USER REQUEST: {message.content}")
+        prompt_parts.append(f"USER REQUEST: {clean_content}")
         prompt_parts.append("\nINSTRUCTIONS: Answer the request directly. Use your general knowledge for everything else. Never apologize for missing memory.")
         prompt_parts.append("If the user wants you to create, generate, or draw an image, your response MUST start with 'IMAGE_GEN: {description of the image}' followed by a brief confirmation.")
         prompt_parts.append("If the user asks for a video, music, or song, your response MUST start with 'VIDEO_LINK: {search query}'. For the search query, prioritize official or most popular versions (e.g., add 'official music video' or 'original'). After that, provide ONLY a single short sentence like 'Enjoy!' or 'Here is the official video:'. NEVER include tips or mention 'Picture-in-Picture'.")
@@ -99,7 +103,7 @@ async def on_message(message: discord.Message):
         await message.reply(chunks[0])
         for chunk in chunks[1:]:
             await message.channel.send(chunk)
-        new_summary = update_summary(memory, message.content, response)
+        new_summary = update_summary(memory, clean_content, response)
         supabase_service.update_conversation_summary(new_summary)
         print("✅ MESSAGE SENT")
     except Exception as e:
