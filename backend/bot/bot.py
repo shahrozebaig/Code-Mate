@@ -38,36 +38,40 @@ async def on_message(message: discord.Message):
             return
         print("🧠 FETCHING MEMORY")
         memory = supabase_service.get_conversation_summary()
+
         print("📎 CHECKING ATTACHMENTS")
         doc_text, image_url = await process_attachments(message.attachments)
+
         query_embedding = await embed_text(clean_content)
         knowledge = retrieve_knowledge(query_embedding) or "None"
+
+        # Construct System Prompt
+        system_instructions = [
+            "You are CodeMate, a helpful and accurate AI assistant.",
+            "Provide clear, direct answers to the user's questions.",
+            "For technical terms like RAG or LLM, use their Artificial Intelligence definitions.",
+            "Use the provided context to stay accurate. Avoid making up information.",
+            "",
+            "SPECIAL COMMANDS:",
+            "1. IMAGE_GEN: Start with 'IMAGE_GEN: {prompt}' if asked for an image.",
+            "2. VIDEO_LINK: Start with 'VIDEO_LINK: {query}' if asked for a video.",
+        ]
+
+        if memory:
+            system_instructions.append(f"\nCONVERSATION SUMMARY (MEMORY):\n{memory}")
+        
+        if knowledge and knowledge != "None":
+            system_instructions.append(f"\nDOCUMENT KNOWLEDGE (RAG):\n{knowledge[:2000]}")
+
+        full_system_prompt = "\n".join(system_instructions)
+
+        # Construct User Prompt
+        user_prompt = clean_content
         if doc_text:
-            print("📄 DOCUMENT TEXT EXTRACTED")
-            truncated_doc = doc_text[:3000] + "..." if len(doc_text) > 3000 else doc_text
-            user_msg = f"{clean_content}\n\nATTACHED DOCUMENT CONTENT (TRUNCATED):\n{truncated_doc}"
-        else:
-            user_msg = clean_content
-        prompt_parts = []
-        if image_url:
-            prompt_parts.append("CRITICAL: Analyzing the attached image is your top priority. Ignore any unrelated conversation history below and answer based on the visual content.")
-        if doc_text:
-            prompt_parts.append(f"The user has provided a document (see 'ATTACHED DOCUMENT CONTENT' in the user message).")
-        prompt_parts.append(f"USER REQUEST: {clean_content}")
-        prompt_parts.append("\nINSTRUCTIONS: Answer the request directly. Use your general knowledge for everything else. Never apologize for missing memory.")
-        prompt_parts.append("If the user wants you to create, generate, or draw an image, your response MUST start with 'IMAGE_GEN: {description of the image}' followed by a brief confirmation.")
-        prompt_parts.append("If the user asks for a video, music, or song, your response MUST start with 'VIDEO_LINK: {search query}'. For the search query, prioritize official or most popular versions (e.g., add 'official music video' or 'original'). After that, provide ONLY a single short sentence like 'Enjoy!' or 'Here is the official video:'. NEVER include tips or mention 'Picture-in-Picture'.")
-        if not image_url:
-            short_memory = memory[:1500] if memory else ""
-            if short_memory.strip():
-                prompt_parts.append(f"\nRELEVANT CONTEXT (FOR REFERENCE ONLY):\n{short_memory}")
-            if knowledge and knowledge != "None":
-                short_knowledge = knowledge[:1500]
-                prompt_parts.append(f"\nADDITIONAL KNOWLEDGE:\n{short_knowledge}")
-        full_system_prompt = "\n\n".join(prompt_parts)
-        print(f"📏 PROMPT LENGTH: {len(full_system_prompt)} chars")
+            user_prompt = f"ATTACHED DOCUMENT CONTENT:\n{doc_text[:3000]}\n\nUSER QUESTION: {clean_content}"
+
         print("🚀 CALLING LLM...")
-        response = await call_llm(full_system_prompt, image_url=image_url)
+        response = await call_llm(user_prompt, system_prompt=full_system_prompt, image_url=image_url)
         print("🤖 LLM RESPONSE:", response)
         if response.startswith("IMAGE_GEN:"):
             try:
